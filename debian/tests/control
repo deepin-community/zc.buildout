@@ -1,0 +1,2 @@
+Tests: all
+Depends: @, python3-zope.testing

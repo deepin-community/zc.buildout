@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_test:
+	: do not run, test dependencies are not packaged
+
+override_dh_install:
+	dh_install
+
+	# Remove doctest and tests.py from the source which should be
+	# in /usr/share/doc instead (even for doctest files)
+	#
+	# TODO: Perhaps run the tests at build time?
+	for py in $(shell py3versions -vr); do \
+	    rm -f debian/python3-zc.buildout/usr/lib/python3/dist-packages/zc/buildout/*.txt; \
+	    rm -f debian/python3-zc.buildout/usr/lib/python3/dist-packages/zc/buildout/tests.py; \
+	done;
+
+	# Run tests on build time, but only if ``nocheck'' build
+	# option has not been set.
+	#
+	# Run the tests here rather than overriding dh_auto_test to
+	# make sure that nothing is missing within the binary
+	# directory.
+	#
+	# Disabled for now as they need to be updated upstream.
+#ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+#	for py in $(shell py3versions -vr); do \
+#	    PYTHONPATH=debian/python3-zc.buildout/usr/lib/python3/dist-packages \
+#		python$$py setup.py test -m zc.buildout.tests; \
+#	done;
+#endif
